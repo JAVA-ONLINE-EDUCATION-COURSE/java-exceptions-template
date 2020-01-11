@@ -1,0 +1,7 @@
+1 - как я понял все Exception должны быть в пакете com.epam.izh.rd.online.exception. Сначала кидал их в com.epam.izh.rd.online.service.exceptions, которую сам создал и ловил ошибки
+
+2 -в UserServiceTest пришлось добавить "выброс" исключений, иначе - Error:(45, 29) java: unreported exception com.epam.izh.rd.online.exception.UserAlreadyRegisteredException; must be caught or declared to be thrown
+
+3 - в Тесты: Asserts и в UserServiceTest пришлось "повтыкать" throws ClassNotFoundException
+
+PS у меня IntelliJ IDEA 2019.3.1 Community edition
