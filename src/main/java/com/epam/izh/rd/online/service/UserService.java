@@ -1,11 +1,14 @@
 package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.NotAccessException;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
 
 public class UserService implements IUserService {
-
+    private final String SimplePassword = "\\d+";
     private IUserRepository userRepository;
 
     public UserService(IUserRepository userRepository) {
@@ -30,13 +33,20 @@ public class UserService implements IUserService {
      * @param user - даныне регистрирующегося пользователя
      */
     @Override
-    public User register(User user) {
+    public User register(User user) throws UserAlreadyRegisteredException, SimplePasswordException {
 
-        //
-        // Здесь необходимо реализовать перечисленные выше проверки
-        //
+        if (user.getPassword() == null || user.getLogin() == null || user.getPassword().equals("") || user.getLogin().equals("")) {
+            throw new IllegalArgumentException("Ошибка в заполнении полей");
+        }
 
-        // Если все проверки успешно пройдены, сохраняем пользователя в базу
+        if (userRepository.findByLogin(user.getLogin()) != null) {
+            throw new UserAlreadyRegisteredException("Пользователь с логином '" + user.getLogin() + "' уже зарегистрирован");
+        }
+
+        if (user.getPassword().matches(SimplePassword)) {
+            throw new SimplePasswordException("Пароль не соответствует требованиям безопасности");
+        }
+
         return userRepository.save(user);
     }
 
@@ -58,14 +68,36 @@ public class UserService implements IUserService {
      *
      * @param login
      */
-    public void delete(String login) {
+    public void delete(String login) throws NotAccessException {
+        if (CurrentUserManager.getCurrentLoggedInUser() == null) {
+            return;
+            // или лучше throw new NotAccessException("Недостаточно прав для выполнения операции"); ??
+        }
 
-        // Здесь необходимо сделать доработку метод
+        String currentUser = CurrentUserManager.getCurrentLoggedInUser().getLogin();
 
+        /**
+         * Поэтому, если мы не перехватим (через try-catch) это исключение, то оно уйдет пользователю с данным текстом.
+         * Нам необходимо это предотвратить, перехватив данное исключение и выбросив в ответ на него свое,
+         * но уже с понятным для пользователя сообщением.
+         *
+         * Я правильно понимаю, что Вы хотите так -
+         **/
+
+        try {
             userRepository.deleteByLogin(login);
+        } catch (UnsupportedOperationException e) {
+            throw new NotAccessException("Недостаточно прав для выполнения операции");
+        }
 
-        // Здесь необходимо сделать доработку метода
-
+        /**
+         * Хотя по мне более красиво вот так.
+         *
+         *  if (currentUser.equalsIgnoreCase("Admin")) {
+         *      throw new NotAccessException("Недостаточно прав для выполнения операции");
+         *  }
+         *
+         */
     }
 
 }

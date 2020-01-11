@@ -1,6 +1,8 @@
 package com.epam.izh.rd.online;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
 import com.epam.izh.rd.online.service.CurrentUserManager;
@@ -39,7 +41,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("Тест метода IUserService.register(User user) кейс 2")
-    void testRegisterCase2() {
+    void testRegisterCase2() throws SimplePasswordException, UserAlreadyRegisteredException, ClassNotFoundException {
         User user = Providers.getUser();
 
         userService.register(user);
@@ -49,7 +51,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("Тест метода IUserService.register(User user) кейс 3")
-    void testRegisterCase3() {
+    void testRegisterCase3() throws ClassNotFoundException {
         User user = getUserWithNumberPassword();
 
         assertion.assertThrowsWithClassName("SimplePasswordException", () -> userService.register(user),
@@ -60,7 +62,7 @@ public class UserServiceTest {
     @ParameterizedTest
     @MethodSource("com.epam.izh.rd.online.Providers#testDelete")
     @DisplayName("Тест метода IUserService.delete(String login)")
-    void testDelete(User user) {
+    void testDelete(User user) throws ClassNotFoundException {
         CurrentUserManager.setCurrentLoggedInUser(user);
         assertion.assertThrowsWithClassName("NotAccessException", () -> userService.delete("123"),
                 "Недостаточно прав для выполнения операции");
