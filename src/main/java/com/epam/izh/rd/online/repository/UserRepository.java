@@ -39,7 +39,6 @@ public class UserRepository implements IUserRepository {
         } else {
             userWithSameLogin.setPassword(user.getPassword());
         }
-
         return user;
     }
 
@@ -74,5 +73,10 @@ public class UserRepository implements IUserRepository {
         }
 
         userDatabase.removeIf(user -> user.getLogin().equalsIgnoreCase(login));
+    }
+
+    @Override
+    public String toString() {
+        return  " "+userDatabase;
     }
 }
