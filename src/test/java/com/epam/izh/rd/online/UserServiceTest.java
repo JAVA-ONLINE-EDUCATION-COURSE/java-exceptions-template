@@ -1,11 +1,11 @@
 package com.epam.izh.rd.online;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
-import com.epam.izh.rd.online.service.CurrentUserManager;
-import com.epam.izh.rd.online.service.IUserService;
-import com.epam.izh.rd.online.service.UserService;
+import com.epam.izh.rd.online.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,10 +39,14 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("Тест метода IUserService.register(User user) кейс 2")
-    void testRegisterCase2() throws Exception {
+    void testRegisterCase2() {
         User user = Providers.getUser();
 
-        userService.register(user);
+        try {
+            userService.register(user);
+        } catch (UserAlreadyRegisteredException | SimplePasswordException e) {
+            e.printStackTrace();
+        }
         assertion.assertThrowsWithClassName("UserAlreadyRegisteredException", () -> userService.register(user),
                 "Пользователь с логином " + user.getLogin() + " уже зарегистрирован");
     }
