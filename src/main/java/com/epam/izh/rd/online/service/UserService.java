@@ -35,9 +35,8 @@ public class UserService implements IUserService {
      * @param user - даныне регистрирующегося пользователя
      */
     @Override
-    public User register(User user) {
-        if (user.getLogin() == null || user.getPassword() == null
-                || user.getPassword().equals("") || user.getLogin().equals("")) {
+    public User register(User user) throws UserAlreadyRegisteredException {
+        if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Ошибка в заполнении полей");
         }
         if (user.equals(userRepository.findByLogin(user.getLogin()))) {
