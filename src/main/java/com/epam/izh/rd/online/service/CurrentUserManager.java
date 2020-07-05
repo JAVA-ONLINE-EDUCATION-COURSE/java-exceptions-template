@@ -20,7 +20,8 @@ public class CurrentUserManager {
 
     private static User currentUser;
 
-    private CurrentUserManager() {}
+    private CurrentUserManager() {
+    }
 
     public static User getCurrentLoggedInUser() {
         return currentUser;
