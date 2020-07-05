@@ -1,6 +1,9 @@
 package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.NotAccessException;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
 
@@ -30,15 +33,24 @@ public class UserService implements IUserService {
      * @param user - даныне регистрирующегося пользователя
      */
     @Override
-    public User register(User user) {
+    public User register(User user) throws UserAlreadyRegisteredException, SimplePasswordException {
 
-        //
-        // Здесь необходимо реализовать перечисленные выше проверки
-        //
+        if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Ошибка в заполнении полей");
+        }
 
-        // Если все проверки успешно пройдены, сохраняем пользователя в базу
+        User findByLogin = userRepository.findByLogin(user.getLogin());
+        if (findByLogin != null) {
+            throw new UserAlreadyRegisteredException("Пользователь с логином " + user.getLogin() + " уже зарегистрирован");
+        }
+
+        if (user.getPassword().matches("\\d+")) {
+            throw new SimplePasswordException("Пароль не соответствует требованиям безопасности");
+        }
+
         return userRepository.save(user);
     }
+
 
     /**
      * Необходимо доработать данный метод следующим функционлом:
@@ -58,14 +70,16 @@ public class UserService implements IUserService {
      *
      * @param login
      */
-    public void delete(String login) {
 
-        // Здесь необходимо сделать доработку метод
+    public void delete(String login) throws NotAccessException {
 
+        try {
+            if (!"Admin".equals(login)) {
+                throw new UnsupportedOperationException();
+            }
             userRepository.deleteByLogin(login);
-
-        // Здесь необходимо сделать доработку метода
-
+        } catch (UnsupportedOperationException exception) {
+            throw new NotAccessException("Недостаточно прав для выполнения операции");
+        }
     }
-
 }
