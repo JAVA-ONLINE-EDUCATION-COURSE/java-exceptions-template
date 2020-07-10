@@ -1,6 +1,9 @@
 package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.NotAccessException;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
 
@@ -30,14 +33,33 @@ public class UserService implements IUserService {
      * @param user - даныне регистрирующегося пользователя
      */
     @Override
-    public User register(User user) {
-
-        //
-        // Здесь необходимо реализовать перечисленные выше проверки
-        //
-
-        // Если все проверки успешно пройдены, сохраняем пользователя в базу
+    public User register(User user) throws UserAlreadyRegisteredException, SimplePasswordException {
+        validateUserData(user);
         return userRepository.save(user);
+    }
+
+    private void validateUserData(User user) throws UserAlreadyRegisteredException, SimplePasswordException {
+        isEmptyLoginOrPasswordUserValue(user);
+        isUserAlreadyRegistered(user);
+        isUserSimplePassword(user);
+    }
+
+    private void isEmptyLoginOrPasswordUserValue(User user) {
+        if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Ошибка в заполнении полей");
+        }
+    }
+
+    private void isUserSimplePassword(User user) throws UserAlreadyRegisteredException {
+        if (userRepository.findByLogin(user.getLogin()) != null) {
+            throw new UserAlreadyRegisteredException("Пользователь с логином " + user.getLogin() + " уже зарегистрирован");
+        }
+    }
+
+    private void isUserAlreadyRegistered(User user) throws SimplePasswordException {
+        if (user.getPassword().matches("\\d*")) {
+            throw new SimplePasswordException("Пароль не соответствует требованиям безопасности");
+        }
     }
 
     /**
@@ -58,14 +80,11 @@ public class UserService implements IUserService {
      *
      * @param login
      */
-    public void delete(String login) {
-
-        // Здесь необходимо сделать доработку метод
-
+    public void delete(String login) throws NotAccessException {
+        try {
             userRepository.deleteByLogin(login);
-
-        // Здесь необходимо сделать доработку метода
-
+        } catch (UnsupportedOperationException e) {
+            throw new NotAccessException("Недостаточно прав для выполнения операции");
+        }
     }
-
 }
