@@ -1,8 +1,13 @@
 package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.NotAccessException;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
+
+import java.util.stream.Collectors;
 
 public class UserService implements IUserService {
 
@@ -29,12 +34,31 @@ public class UserService implements IUserService {
      *
      * @param user - даныне регистрирующегося пользователя
      */
-    @Override
-    public User register(User user) {
 
-        //
-        // Здесь необходимо реализовать перечисленные выше проверки
-        //
+
+
+    @Override
+    public User register(User user) throws Exception {
+
+         // проверяем заполняемость полей
+
+            if (user.getPassword().trim().length() == 0 || user.getLogin().trim().length() == 0) {
+                throw new IllegalArgumentException("Ошибка в заполнении полей");
+            }
+
+        // проверяем есть ли в базе юзер с таким же логином
+            User foundUser = userRepository.findByLogin(user.getLogin());
+
+
+            if (foundUser != null) {
+                throw new UserAlreadyRegisteredException(foundUser);
+            }
+
+        // проверяем сложность пароля
+
+        if (user.getPassword().trim().chars().filter(y -> y < 48 || y > 57).mapToObj(String::valueOf).collect(Collectors.toList()).size() < 1) {
+            throw new SimplePasswordException();
+        }
 
         // Если все проверки успешно пройдены, сохраняем пользователя в базу
         return userRepository.save(user);
@@ -61,9 +85,15 @@ public class UserService implements IUserService {
     public void delete(String login) {
 
         // Здесь необходимо сделать доработку метод
+    try {
 
-            userRepository.deleteByLogin(login);
+        userRepository.deleteByLogin(login);
+        }
+        catch(UnsupportedOperationException e) {
 
+        throw new NotAccessException();
+
+        }
         // Здесь необходимо сделать доработку метода
 
     }
