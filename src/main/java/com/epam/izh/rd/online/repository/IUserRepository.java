@@ -9,4 +9,6 @@ public interface IUserRepository {
     User findByLogin(String login);
 
     void deleteByLogin(String login);
+
+    User findByPassword(String password);
 }
