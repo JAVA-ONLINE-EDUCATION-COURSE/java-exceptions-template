@@ -57,6 +57,8 @@ public class UserRepository implements IUserRepository {
                 .findFirst().orElse(null);
     }
 
+
+
     /**
      * Метод удаления пользователя с определенным логином.
      * <p>
@@ -74,5 +76,14 @@ public class UserRepository implements IUserRepository {
         }
 
         userDatabase.removeIf(user -> user.getLogin().equalsIgnoreCase(login));
+    }
+
+    @Override
+    public User findByPassword(String password) {
+        Objects.requireNonNull(password, "Отсутствует пароль");
+
+        return userDatabase.stream()
+                .filter(user -> user.getPassword().equalsIgnoreCase(password))
+                .findFirst().orElse(null);
     }
 }
