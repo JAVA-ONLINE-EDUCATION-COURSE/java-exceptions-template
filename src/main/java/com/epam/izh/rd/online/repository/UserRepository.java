@@ -75,4 +75,11 @@ public class UserRepository implements IUserRepository {
 
         userDatabase.removeIf(user -> user.getLogin().equalsIgnoreCase(login));
     }
+
+    @Override
+    public boolean isPasswordCorrect(User foundUser, User user) {
+        return userDatabase.stream()
+                .filter(i -> (i == foundUser) && i.getPassword().equals(user.getPassword()))
+                .findFirst().orElse(null) != null;
+    }
 }
