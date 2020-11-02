@@ -52,4 +52,12 @@ public class User {
     public int hashCode() {
         return Objects.hash(login, password);
     }
+
+    public boolean isEmpty() {
+        return this.login.isEmpty() || this.password.isEmpty();
+    }
+
+    public boolean hasOnlyDigitsPassword() {
+        return this.password.matches("\\d+");
+    }
 }
