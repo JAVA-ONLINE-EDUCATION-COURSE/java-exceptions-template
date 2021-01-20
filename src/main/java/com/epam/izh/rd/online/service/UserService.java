@@ -1,6 +1,9 @@
 package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.NotAccessException;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
 
@@ -13,7 +16,7 @@ public class UserService implements IUserService {
     }
 
     /**
-     * Необходимо доработать данный метод следующим функционлом:
+     * Необходимо доработать данный метод следующим функционалом:
      * <p>
      * 1) Необходимо проверять наличие заполнения всех полей сущности User. Если же поле с логином или паролем не
      * заполнено или заполнено пустой строкой. Необходимо выбрасывать существующее непроверяемое исключение
@@ -27,21 +30,28 @@ public class UserService implements IUserService {
      * В случае, если это происходит (например пароль = "123432") необходимо выбрасывать
      * исключение с названием SimplePasswordException и текстом - "Пароль не соответствует требованиям безопасности"
      *
-     * @param user - даныне регистрирующегося пользователя
+     * @param user - данные регистрирующегося пользователя
      */
     @Override
-    public User register(User user) {
-
-        //
-        // Здесь необходимо реализовать перечисленные выше проверки
-        //
-
-        // Если все проверки успешно пройдены, сохраняем пользователя в базу
-        return userRepository.save(user);
+    public User register(User user) throws IllegalArgumentException, UserAlreadyRegisteredException, SimplePasswordException {
+        String login = user.getLogin();
+        String password = user.getPassword();
+        if (login.equals("") || password.equals("")){
+            throw new IllegalArgumentException("Ошибка в заполнении полей");
+        }
+        if (userRepository.findByLogin(login) != null){
+            throw new UserAlreadyRegisteredException("Пользователь с логином "+ login + " уже зарегистрирован");
+        }
+        if (password.matches("\\d+")){
+            throw new SimplePasswordException("Пароль не соответствует требованиям безопасности");
+        }
+        {
+            return userRepository.save(user);
+        }
     }
 
     /**
-     * Необходимо доработать данный метод следующим функционлом:
+     * Необходимо доработать данный метод следующим функционалом:
      * <p>
      * Если мы попытаемся вызвать метод удаления {@link UserRepository#deleteByLogin(String)}
      * пользователем не админом (считаем, что админ имеет логин Admin), то будет выброшено исключение
@@ -58,14 +68,13 @@ public class UserService implements IUserService {
      *
      * @param login
      */
-    public void delete(String login) {
+    public void delete(String login) throws NotAccessException {
 
-        // Здесь необходимо сделать доработку метод
-
-            userRepository.deleteByLogin(login);
-
-        // Здесь необходимо сделать доработку метода
-
+try {
+    userRepository.deleteByLogin(login);
+} catch (UnsupportedOperationException e){
+    throw new NotAccessException("Недостаточно прав для выполнения операции");
+}
     }
 
 }
