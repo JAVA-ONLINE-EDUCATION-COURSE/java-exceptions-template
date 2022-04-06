@@ -53,7 +53,7 @@ public class UserServiceTest {
         User user = getUserWithNumberPassword();
 
         assertion.assertThrowsWithClassName("SimplePasswordException", () -> userService.register(user),
-                "Пароль не соответствует требованиям безопасности"
+                "К сожаленю,пароль не соответствует требованиям безопасности"
         );
     }
 
