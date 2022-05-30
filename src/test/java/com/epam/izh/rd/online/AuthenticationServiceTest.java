@@ -13,30 +13,34 @@ import static com.epam.izh.rd.online.Providers.getUser;
 
 public class AuthenticationServiceTest {
 
-    private IAuthenticationService authenticationService;
-    private IUserRepository userRepository;
-    private Assert assertion = new Assert();
+  private IAuthenticationService authenticationService;
+  private IUserRepository userRepository;
+  private Assert assertion = new Assert();
 
-    @BeforeEach
-    private void setup() {
-        userRepository = new UserRepository();
-        authenticationService = new AuthenticationService(userRepository);
-    }
+  @BeforeEach
+  private void setup() {
+    userRepository = new UserRepository();
+    authenticationService = new AuthenticationService(userRepository);
+  }
 
-    @Test
-    @DisplayName("Тест метода IAuthenticationService.login(User user)")
-    void testRegisterCase1() {
-        assertion.assertThrowsWithClassName("UserNotFoundException", () -> authenticationService.login(getUser()),
-                "Пользователь с таким логином не найден");
-    }
+  @Test
+  @DisplayName("Тест метода IAuthenticationService.login(User user)")
+  void testRegisterCase1() {
+    assertion.assertThrowsWithClassName(
+        "UserNotFoundException",
+        () -> authenticationService.login(getUser()),
+        "Пользователь с таким логином не найден");
+  }
 
-    @Test
-    @DisplayName("Тест метода IAuthenticationService.login(User user)")
-    void testRegisterCase2() {
-        User user = getUser();
-        userRepository.save(user);
+  @Test
+  @DisplayName("Тест метода IAuthenticationService.login(User user)")
+  void testRegisterCase2() {
+    User user = getUser();
+    userRepository.save(user);
 
-        assertion.assertThrowsWithClassName("NotCorrectPasswordException", () -> authenticationService.login(Providers.changePasswordToWrongValue(user)),
-                "Пароль введен неверно!");
-    }
+    assertion.assertThrowsWithClassName(
+        "NotCorrectPasswordException",
+        () -> authenticationService.login(Providers.changePasswordToWrongValue(user)),
+        "Пароль введен неверно!");
+  }
 }
